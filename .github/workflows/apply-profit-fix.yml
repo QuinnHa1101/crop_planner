@@ -1,0 +1,139 @@
+name: Apply all-farm profit fix
+
+on:
+  push:
+    branches: [gh-pages]
+    paths:
+      - ".github/workflows/apply-profit-fix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-profit-totals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Patch planner totals
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          helper = r'''
+	// Return totals for the selected season and active location view.
+	function calendar_totals_season(season_index){
+		var fin = new Finance;
+		if (!self.cyear) return fin;
+
+		function add_total(total){
+			if (!total) return;
+			fin.profit.min += total.profit.min;
+			fin.profit.max += total.profit.max;
+			fin.plantings += total.plantings;
+			fin.harvests.min += total.harvests.min;
+			fin.harvests.max += total.harvests.max;
+		}
+
+		var farm = self.cyear.data.farm;
+		var indoor = self.cyear.data.greenhouse;
+		if (self.cview === "all"){
+			add_total(farm.totals.season[season_index]);
+			add_total(indoor.totals.season[season_index]);
+			return fin;
+		}
+		if (self.cview === "farm"){
+			add_total(farm.totals.season[season_index]);
+			return fin;
+		}
+
+		// Greenhouse and Ginger Island share one data bucket, so calculate
+		// these filtered views from each plan's saved location.
+		var start = (season_index * SEASON_DAYS) + 1;
+		var end = start + SEASON_DAYS - 1;
+		for (var date = start; date <= end; date++){
+			$.each(indoor.plans[date] || [], function(i, plan){
+				if ((plan.location || "greenhouse") !== self.cview) return;
+				var cost = plan.get_cost();
+				fin.profit.min -= cost;
+				fin.profit.max -= cost;
+				fin.plantings += plan.amount;
+			});
+			$.each(indoor.harvests[date] || [], function(i, harvest){
+				var location = harvest.plan && harvest.plan.location || "greenhouse";
+				if (location !== self.cview) return;
+				fin.profit.min += harvest.revenue.min;
+				fin.profit.max += harvest.revenue.max;
+				fin.harvests.min += harvest.yield.min;
+				fin.harvests.max += harvest.yield.max;
+			});
+		}
+		return fin;
+	}
+
+'''
+
+          exposure_anchor = "\tself.calendar_plans = calendar_plans;\n"
+          annual_old = '''// Add up annual total
+		for (var i = 0; i < farm.totals.seasons; i++){
+			var season = farm.totals.seasons[i];
+			var y_total = farm.totals.year;
+			y_total.profit.min += season.profit.min
+			y_total.profit.max += season.profit.max
+		}'''
+          annual_new = '''// Add up annual total
+		for (var i = 0; i < farm.totals.season.length; i++){
+			var season = farm.totals.season[i];
+			var y_total = farm.totals.year;
+			y_total.profit.min += season.profit.min;
+			y_total.profit.max += season.profit.max;
+		}'''
+
+          for filename in ("scripts/planner.js", "planner.js"):
+              path = Path(filename)
+              text = path.read_text()
+              if "function calendar_totals_season(" not in text:
+                  if exposure_anchor not in text:
+                      raise SystemExit(f"Missing calendar helper anchor in {filename}")
+                  text = text.replace(exposure_anchor, helper + exposure_anchor, 1)
+              if "self.calendar_totals_season = calendar_totals_season;" not in text:
+                  text = text.replace(
+                      "\tself.calendar_totals_day = calendar_totals_day;",
+                      "\tself.calendar_totals_day = calendar_totals_day;\n\tself.calendar_totals_season = calendar_totals_season;",
+                      1,
+                  )
+              if annual_old in text:
+                  text = text.replace(annual_old, annual_new, 1)
+              elif "farm.totals.seasons" in text:
+                  raise SystemExit(f"Unexpected annual total block in {filename}")
+              path.write_text(text)
+
+          index = Path("index.html")
+          html = index.read_text()
+          current_old = "self.cfarm().totals.season[self.cseason.index]"
+          card_old = "self.cfarm().totals.season[season.index]"
+          if current_old not in html or card_old not in html:
+              raise SystemExit("Expected season total bindings were not found")
+          html = html.replace(current_old, "self.calendar_totals_season(self.cseason.index)")
+          html = html.replace(card_old, "self.calendar_totals_season(season.index)")
+          index.write_text(html)
+
+          assert "farm.totals.seasons" not in Path("scripts/planner.js").read_text()
+          assert "self.cfarm().totals.season" not in index.read_text()
+          PY
+
+      - name: Commit fixed source
+        shell: bash
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html planner.js scripts/planner.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Fix all-farm profit totals [skip ci]"
+            git push origin gh-pages
+          fi
