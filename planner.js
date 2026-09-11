@@ -492,11 +492,11 @@ $scope.$apply();
 		})();
 
 // Add up annual total
-		for (var i = 0; i < farm.totals.seasons; i++){
-			var season = farm.totals.seasons[i];
+		for (var i = 0; i < farm.totals.season.length; i++){
+			var season = farm.totals.season[i];
 			var y_total = farm.totals.year;
-			y_total.profit.min += season.profit.min
-			y_total.profit.max += season.profit.max
+			y_total.profit.min += season.profit.min;
+			y_total.profit.max += season.profit.max;
 		}
 		
 		// Update next year
@@ -750,9 +750,60 @@ $scope.$apply();
 		return fin;
 	}
 
+	// Return totals for the selected season and active location view.
+	function calendar_totals_season(season_index){
+		var fin = new Finance;
+		if (!self.cyear) return fin;
+
+		function add_total(total){
+			if (!total) return;
+			fin.profit.min += total.profit.min;
+			fin.profit.max += total.profit.max;
+			fin.plantings += total.plantings;
+			fin.harvests.min += total.harvests.min;
+			fin.harvests.max += total.harvests.max;
+		}
+
+		var farm = self.cyear.data.farm;
+		var indoor = self.cyear.data.greenhouse;
+		if (self.cview === "all"){
+			add_total(farm.totals.season[season_index]);
+			add_total(indoor.totals.season[season_index]);
+			return fin;
+		}
+		if (self.cview === "farm"){
+			add_total(farm.totals.season[season_index]);
+			return fin;
+		}
+
+		// Greenhouse and Ginger Island share one data bucket, so calculate
+		// these filtered views from each plan's saved location.
+		var start = (season_index * SEASON_DAYS) + 1;
+		var end = start + SEASON_DAYS - 1;
+		for (var date = start; date <= end; date++){
+			$.each(indoor.plans[date] || [], function(i, plan){
+				if ((plan.location || "greenhouse") !== self.cview) return;
+				var cost = plan.get_cost();
+				fin.profit.min -= cost;
+				fin.profit.max -= cost;
+				fin.plantings += plan.amount;
+			});
+			$.each(indoor.harvests[date] || [], function(i, harvest){
+				var location = harvest.plan && harvest.plan.location || "greenhouse";
+				if (location !== self.cview) return;
+				fin.profit.min += harvest.revenue.min;
+				fin.profit.max += harvest.revenue.max;
+				fin.harvests.min += harvest.yield.min;
+				fin.harvests.max += harvest.yield.max;
+			});
+		}
+		return fin;
+	}
+
 	self.calendar_plans = calendar_plans;
 	self.calendar_harvests = calendar_harvests;
 	self.calendar_totals_day = calendar_totals_day;
+	self.calendar_totals_season = calendar_totals_season;
 
 	
 	// Check if current farm mode is greenhouse

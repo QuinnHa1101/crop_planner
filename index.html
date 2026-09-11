@@ -74,11 +74,11 @@
 					</div>
 					<!-- Mobile-only compact stat strip -->
 					<div class="mobile-stat-strip hidden-sm hidden-md hidden-lg">
-						<span><i class="fa fa-tint"></i> {{self.cfarm().totals.season[self.cseason.index].get_plantings(1)}}</span>
-						<span><i class="fa fa-pagelines"></i> {{self.cfarm().totals.season[self.cseason.index].get_harvests(1)}}</span>
+						<span><i class="fa fa-tint"></i> {{self.calendar_totals_season(self.cseason.index).get_plantings(1)}}</span>
+						<span><i class="fa fa-pagelines"></i> {{self.calendar_totals_season(self.cseason.index).get_harvests(1)}}</span>
 						<span><i class="fa fa-bar-chart"></i>
-							<span ng-show="self.cfarm().totals.season[self.cseason.index].profit.min==self.cfarm().totals.season[self.cseason.index].profit.max">{{self.cfarm().totals.season[self.cseason.index].profit.min>0 && '+' || ''}}{{self.cfarm().totals.season[self.cseason.index].get_profit(1)}}g</span>
-							<span ng-show="self.cfarm().totals.season[self.cseason.index].profit.min!=self.cfarm().totals.season[self.cseason.index].profit.max">{{self.cfarm().totals.season[self.cseason.index].get_profit(1)}}–{{self.cfarm().totals.season[self.cseason.index].get_profit(1,1)}}g</span>
+							<span ng-show="self.calendar_totals_season(self.cseason.index).profit.min==self.calendar_totals_season(self.cseason.index).profit.max">{{self.calendar_totals_season(self.cseason.index).profit.min>0 && '+' || ''}}{{self.calendar_totals_season(self.cseason.index).get_profit(1)}}g</span>
+							<span ng-show="self.calendar_totals_season(self.cseason.index).profit.min!=self.calendar_totals_season(self.cseason.index).profit.max">{{self.calendar_totals_season(self.cseason.index).get_profit(1)}}–{{self.calendar_totals_season(self.cseason.index).get_profit(1,1)}}g</span>
 						</span>
 						<span class="mobile-clear-btn" ng-click="self.clear_season(self.cseason)"><i class="fa fa-trash"></i> Clear</span>
 					</div>
@@ -90,22 +90,22 @@
 							<tbody>
 								<tr>
 									<th width="25%"><i class="fa fa-fw fa-tint"></i> Planted</th>
-									<td>{{self.cfarm().totals.season[self.cseason.index].get_plantings(1)}}</td>
+									<td>{{self.calendar_totals_season(self.cseason.index).get_plantings(1)}}</td>
 									
 									<th width="25%"><i class="fa fa-fw fa-pagelines"></i> Harvests</th>
-									<td>{{self.cfarm().totals.season[self.cseason.index].get_harvests(1)}}</td>
+									<td>{{self.calendar_totals_season(self.cseason.index).get_harvests(1)}}</td>
 								</tr>
 								<tr>
 									<th width="25%"><i class="fa fa-fw fa-bar-chart"></i> Profit</th>
 									<td colspan="3">
-										<div class="profit min" ng-show="self.cfarm().totals.season[self.cseason.index].profit.min==self.cfarm().totals.season[self.cseason.index].profit.max">
-											<div>{{self.cfarm().totals.season[self.cseason.index].profit.min>0 && '+' || ''}}{{self.cfarm().totals.season[self.cseason.index].get_profit(1)}}g</div>
+										<div class="profit min" ng-show="self.calendar_totals_season(self.cseason.index).profit.min==self.calendar_totals_season(self.cseason.index).profit.max">
+											<div>{{self.calendar_totals_season(self.cseason.index).profit.min>0 && '+' || ''}}{{self.calendar_totals_season(self.cseason.index).get_profit(1)}}g</div>
 										</div>
 										
-										<div class="profit" ng-show="self.cfarm().totals.season[self.cseason.index].profit.min!=self.cfarm().totals.season[self.cseason.index].profit.max">
-											<span>{{self.cfarm().totals.season[self.cseason.index].profit.min>0 && '+' || ''}}{{self.cfarm().totals.season[self.cseason.index].get_profit(1)}}g</span>
+										<div class="profit" ng-show="self.calendar_totals_season(self.cseason.index).profit.min!=self.calendar_totals_season(self.cseason.index).profit.max">
+											<span>{{self.calendar_totals_season(self.cseason.index).profit.min>0 && '+' || ''}}{{self.calendar_totals_season(self.cseason.index).get_profit(1)}}g</span>
 											<i class="asc_icon fa fa-sort-amount-asc fa-rotate-270"></i> 
-											<span>{{self.cfarm().totals.season[self.cseason.index].profit.max>0 && '+' || ''}}{{self.cfarm().totals.season[self.cseason.index].get_profit(1, 1)}}g</span>
+											<span>{{self.calendar_totals_season(self.cseason.index).profit.max>0 && '+' || ''}}{{self.calendar_totals_season(self.cseason.index).get_profit(1, 1)}}g</span>
 										</div>
 									</td>
 								</tr>
@@ -130,14 +130,14 @@
 						<div class="name hidden-xs">{{season.name}}</div>
 						<div class="name visible-xs mobile-season-name">{{season.name.substring(0,2)}}</div>
 						
-						<div class="profit min hidden-xs" ng-show="self.cfarm().totals.season[season.index].profit.min==self.cfarm().totals.season[season.index].profit.max">
-							<div>{{self.cfarm().totals.season[season.index].profit.min>0 && '+' || ''}}{{self.cfarm().totals.season[season.index].get_profit(1)}}g</div>
+						<div class="profit min hidden-xs" ng-show="self.calendar_totals_season(season.index).profit.min==self.calendar_totals_season(season.index).profit.max">
+							<div>{{self.calendar_totals_season(season.index).profit.min>0 && '+' || ''}}{{self.calendar_totals_season(season.index).get_profit(1)}}g</div>
 						</div>
 						
-						<div class="profit hidden-xs" ng-show="self.cfarm().totals.season[season.index].profit.min!=self.cfarm().totals.season[season.index].profit.max">
+						<div class="profit hidden-xs" ng-show="self.calendar_totals_season(season.index).profit.min!=self.calendar_totals_season(season.index).profit.max">
 							<i class="asc_icon fa fa-sort-amount-asc"></i>
-							<div>{{self.cfarm().totals.season[season.index].profit.min>0 && '+' || ''}}{{self.cfarm().totals.season[season.index].get_profit(1)}}g</div>
-							<div>{{self.cfarm().totals.season[season.index].profit.max>0 && '+' || ''}}{{self.cfarm().totals.season[season.index].get_profit(1, 1)}}g</div>
+							<div>{{self.calendar_totals_season(season.index).profit.min>0 && '+' || ''}}{{self.calendar_totals_season(season.index).get_profit(1)}}g</div>
+							<div>{{self.calendar_totals_season(season.index).profit.max>0 && '+' || ''}}{{self.calendar_totals_season(season.index).get_profit(1, 1)}}g</div>
 						</div>
 					</div>
 				</div>
