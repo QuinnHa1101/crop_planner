@@ -20,15 +20,27 @@ NEW = '''\t\t// Update the same location bucket in the next year. Passing the Ye
 for filename in ("scripts/planner.js", "planner.js"):
     path = Path(filename)
     text = path.read_text()
-    if NEW in text:
-        continue
-    if OLD not in text:
-        raise SystemExit(f"Expected next-year update block not found in {filename}")
-    path.write_text(text.replace(OLD, NEW, 1))
+    if NEW not in text:
+        if OLD not in text:
+            raise SystemExit(f"Expected next-year update block not found in {filename}")
+        text = text.replace(OLD, NEW, 1)
+        path.write_text(text)
 
 for filename in ("scripts/planner.js", "planner.js"):
     text = Path(filename).read_text()
     assert "var next_farm = farm.greenhouse ? next_year.data.greenhouse : next_year.data.farm;" in text
     assert "update(next_year, true);" not in text
 
-print("Multi-year farm bucket propagation fixed.")
+# The previous HTML kept the old fixed query string, so browsers could continue
+# executing the cached planner.js even after GitHub Pages deployed the source fix.
+index = Path("index.html")
+html = index.read_text()
+old_src = './scripts/planner.js?v=locfix'
+new_src = './scripts/planner.js?v=multiyearfix-20260911'
+if new_src not in html:
+    if old_src not in html:
+        raise SystemExit("Expected planner script URL not found in index.html")
+    index.write_text(html.replace(old_src, new_src, 1))
+
+assert new_src in index.read_text()
+print("Multi-year totals fix and cache-busting URL verified.")
