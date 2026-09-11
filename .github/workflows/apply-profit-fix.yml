@@ -32,3 +32,5 @@ jobs:
             git commit -m "Fix all-farm profit totals [skip ci]"
             git push origin gh-pages
           fi
+
+# Triggered after validating the workflow definition.
