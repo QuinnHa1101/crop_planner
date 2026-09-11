@@ -17,7 +17,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
 	
 	<script src="./scripts/checklist-model.js"></script>	
-	<script src="./scripts/planner.js?v=indoorcarryover-20260911"></script>
+	<script src="./scripts/planner.js?v=seedsource-20260911"></script>
 
 <style>
 .loc_badge{
@@ -504,6 +504,49 @@
 									</label>
 								</div>
 							</div>
+
+							<div class="col-md-12 col-xs-12 seed-source-options" style="margin-top:12px;">
+								<div class="row">
+									<div class="col-md-4 col-xs-12">
+										<b>Seed source</b><br>
+										<select class="form-control" ng-model="self.newplan.seed_source">
+											<option value="buy_all">Buy all</option>
+											<option value="existing_free">Existing / free</option>
+											<option value="mixed">Mixed</option>
+										</select>
+									</div>
+									<div class="col-md-4 col-xs-12" ng-show="self.newplan.seed_source == 'mixed'">
+										<b>Purchased quantity</b><br>
+										<input class="form-control" type="number" min="0" max="{{self.newplan.amount}}" ng-model="self.newplan.paid_seed_count">
+									</div>
+									<div class="col-md-4 col-xs-12">
+										<b>Initial seed cost</b><br>
+										<div class="form-control" style="background:#f7f7f7;">{{self.newplan.get_paid_seed_count()}} seed(s) · {{self.newplan.get_cost(1)}}g</div>
+									</div>
+								</div>
+								<label style="margin-top:10px;">
+									<input type="checkbox" ng-model="self.newplan.replant_same_source"> Use the same seed source for AutoPlant replants
+								</label>
+								<div class="row" ng-show="!self.newplan.replant_same_source">
+									<div class="col-md-4 col-xs-12">
+										<b>Replant seed source</b><br>
+										<select class="form-control" ng-model="self.newplan.replant_seed_source">
+											<option value="buy_all">Buy all</option>
+											<option value="existing_free">Existing / free</option>
+											<option value="mixed">Mixed</option>
+										</select>
+									</div>
+									<div class="col-md-4 col-xs-12" ng-show="self.newplan.replant_seed_source == 'mixed'">
+										<b>Purchased per replant</b><br>
+										<input class="form-control" type="number" min="0" max="{{self.newplan.amount}}" ng-model="self.newplan.replant_paid_seed_count">
+									</div>
+									<div class="col-md-4 col-xs-12">
+										<b>Cost per replant</b><br>
+										<div class="form-control" style="background:#f7f7f7;">{{self.newplan.get_paid_seed_count(true)}} seed(s) · {{self.newplan.get_cost(1, true)}}g</div>
+									</div>
+								</div>
+							</div>
+
 							<div class="col-md-12 col-xs-12 plant-actions">
 								<b></b><br>
 								<div class="btn btn-default" ng-click="self.add_plan(self.cdate)"><i class="fa fa-plus"></i> Plant</div>
@@ -548,6 +591,7 @@
 											<th colspan="2">Crop</th>
 <th>Amount</th>
 											<th>Fertilizer</th>
+											<th class="mobile-hide">Paid Seeds</th>
 											<th class="mobile-hide">Cost</th>
 											<th class="mobile-hide"><i class="fa fa-clock-o"></i> Days</th>
 											<th class="mobile-hide"><i class="fa fa-refresh"></i> Regrows</th>
@@ -576,6 +620,7 @@
 													<select class="form-control" ng-model="plan.fertilizer" ng-options="fert as fert.name for fert in self.config.fertilizer track by fert.id"></select>
 												</div>
 											</td>
+											<td class="mobile-hide">{{plan.get_paid_seed_count()}}/{{plan.amount}} · {{plan.get_seed_source_label()}}</td>
 											<td class="mobile-hide">-{{plan.get_cost(1)}}g</td>
 											<td class="mobile-hide">{{plan.get_grow_time()}}</td>
 											<td class="mobile-hide">{{plan.crop.regrow}}</td>

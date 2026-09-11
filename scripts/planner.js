@@ -558,7 +558,7 @@ $scope.$apply();
 				season_total.harvests.max += harvest.yield.max;
 
 				if (replant){
-					var seed_cost = plan.get_cost();
+					var seed_cost = plan.get_cost(false, true);
 					day_total.profit.min -= seed_cost;
 					day_total.profit.max -= seed_cost;
 					season_total.profit.min -= seed_cost;
@@ -1846,7 +1846,7 @@ function in_greenhouse(){
 	};
 	
 	// Add plan to this farm/year
-	Year.prototype.add_plan = function(newplan, date, auto_replant){
+	Year.prototype.add_plan = function(newplan, date, auto_replant, is_replant_cycle){
 		// Validate data
 		if (!newplan.crop_id) return false;
 		
@@ -1876,6 +1876,7 @@ function in_greenhouse(){
 		// Add plan
 		newplan.location = planner.cmode;
 		newplan.auto_replant = !!auto_replant;
+		newplan.is_auto_replant_cycle = !!is_replant_cycle;
 		var plan = new Plan(newplan.get_data(), planner.in_greenhouse());
 		plan.date = date;
 		plan.year_index = this.index;
@@ -1893,7 +1894,7 @@ function in_greenhouse(){
 			save_data();
 		} else if (auto_replant){
 			// Auto-replant
-			this.add_plan(newplan, next_planting, true);
+			this.add_plan(newplan, next_planting, true, true);
 		}
 	};
 	
@@ -2121,6 +2122,12 @@ self.harvests = [];
 		
 		self.location = "farm";
 		self.auto_replant = false;
+		self.is_auto_replant_cycle = false;
+		self.seed_source = "buy_all";
+		self.paid_seed_count = 0;
+		self.replant_same_source = true;
+		self.replant_seed_source = "buy_all";
+		self.replant_paid_seed_count = 0;
 init();
 		
 		
@@ -2137,6 +2144,12 @@ init();
 			self.greenhouse = in_greenhouse ? true : false;
 			self.location = (data && data.location) ? data.location : (self.greenhouse ? (planner.cmode == 'island' ? 'island' : 'greenhouse') : 'farm');
 			self.auto_replant = !!(data && data.auto_replant);
+			self.is_auto_replant_cycle = !!(data && data.is_auto_replant_cycle);
+			self.seed_source = data.seed_source || "buy_all";
+			self.paid_seed_count = parseInt(data.paid_seed_count || 0);
+			self.replant_same_source = data.replant_same_source !== false;
+			self.replant_seed_source = data.replant_seed_source || "buy_all";
+			self.replant_paid_seed_count = parseInt(data.replant_paid_seed_count || 0);
 		}
 	}
 	
@@ -2149,6 +2162,14 @@ init();
     if (this.irrigated) data.irrigated = true;
     if (this.location) data.location = this.location;
     if (this.auto_replant) data.auto_replant = true;
+    if (this.is_auto_replant_cycle) data.is_auto_replant_cycle = true;
+    data.seed_source = this.seed_source || "buy_all";
+    if (this.seed_source == "mixed") data.paid_seed_count = this.get_paid_seed_count(false);
+    data.replant_same_source = this.replant_same_source !== false;
+    if (this.replant_same_source === false){
+        data.replant_seed_source = this.replant_seed_source || "buy_all";
+        if (this.replant_seed_source == "mixed") data.replant_paid_seed_count = this.get_paid_seed_count(true);
+    }
     return data;
 };
 
@@ -2221,8 +2242,34 @@ Plan.prototype.get_grow_time = function(){
 	return days;
 };
 	
-	Plan.prototype.get_cost = function(locale){
-		var amount = this.crop.buy * this.amount;
+
+	Plan.prototype.get_paid_seed_count = function(replant){
+		var amount = Math.max(0, parseInt(this.amount || 0));
+		var use_replant = !!replant || !!this.is_auto_replant_cycle;
+		var separate_replant = use_replant && this.replant_same_source === false;
+		var source = separate_replant ? this.replant_seed_source : this.seed_source;
+		var custom_count = separate_replant ? this.replant_paid_seed_count : this.paid_seed_count;
+
+		source = source || "buy_all";
+		if (source == "existing_free") return 0;
+		if (source == "buy_all") return amount;
+
+		custom_count = parseInt(custom_count || 0);
+		return Math.max(0, Math.min(amount, custom_count));
+	};
+
+	Plan.prototype.get_seed_source_label = function(replant){
+		var use_replant = !!replant || !!this.is_auto_replant_cycle;
+		var separate_replant = use_replant && this.replant_same_source === false;
+		var source = separate_replant ? this.replant_seed_source : this.seed_source;
+		if (source == "existing_free") return "Existing/free";
+		if (source == "mixed") return "Mixed";
+		return "Buy all";
+	};
+
+	Plan.prototype.get_cost = function(locale, replant){
+		var crop_price = this.crop && this.crop.buy ? this.crop.buy : 0;
+		var amount = crop_price * this.get_paid_seed_count(replant);
 		if (locale) return amount.toLocaleString();
 		return amount;
 	};
