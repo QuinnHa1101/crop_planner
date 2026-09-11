@@ -26,8 +26,8 @@ jobs:
           git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add planner.js scripts/planner.js
+          git add index.html planner.js scripts/planner.js
           if ! git diff --cached --quiet; then
-            git commit -m "Fix greenhouse totals in later years [skip ci]"
+            git commit -m "Deploy multi-year totals fix [skip ci]"
             git push origin gh-pages
           fi
