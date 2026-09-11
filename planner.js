@@ -491,6 +491,123 @@ $scope.$apply();
 			}
 		})();
 
+
+		// --- Greenhouse / Ginger Island crop carry-over across years ---
+		// Regrowing crops persist automatically. Non-regrowing crops persist only
+		// when AutoPlant was selected (legacy saved chains are inferred by cadence).
+		(function add_prior_year_indoor_crops(){
+			if (!farm.greenhouse) return;
+			var cy = farm.year.index;
+			if (cy <= 0) return;
+
+			var year_start_global = (cy * YEAR_DAYS) + 1;
+			var year_end_global = year_start_global + YEAR_DAYS - 1;
+			var regrow_roots = [];
+			var auto_groups = {};
+
+			function chain_key(plan, global_plant, grow_time){
+				var fert = plan.fertilizer && plan.fertilizer.id || "none";
+				var phase = global_plant % grow_time;
+				return [plan.location || "greenhouse", plan.crop.id, plan.amount, fert,
+					plan.irrigated ? 1 : 0, grow_time, phase].join("|");
+			}
+
+			for (var yi = 0; yi < cy; yi++){
+				var previous_year = self.years[yi];
+				if (!previous_year || !previous_year.data || !previous_year.data.greenhouse) continue;
+				$.each(previous_year.data.greenhouse.plans, function(pdate, plans){
+					pdate = parseInt(pdate);
+					$.each(plans || [], function(i, plan){
+						if (!plan || !plan.crop || plan.crop.tree) return;
+						var grow_time = plan.get_grow_time();
+						if (!grow_time) return;
+						var global_plant = (yi * YEAR_DAYS) + pdate;
+						if (plan.crop.regrow){
+							regrow_roots.push({plan: plan, global_plant: global_plant});
+							return;
+						}
+						var key = chain_key(plan, global_plant, grow_time);
+						if (!auto_groups[key]) auto_groups[key] = [];
+						auto_groups[key].push({
+							plan: plan,
+							global_plant: global_plant,
+							grow_time: grow_time
+						});
+					});
+				});
+			}
+
+			function add_carryover_harvest(plan, global_harvest, replant){
+				var local_date = global_harvest - (cy * YEAR_DAYS);
+				if (local_date < 1 || local_date > YEAR_DAYS) return;
+				var harvest = new Harvest(plan, local_date, true, cy);
+
+				if (!farm.harvests[local_date]) farm.harvests[local_date] = [];
+				farm.harvests[local_date].push(harvest);
+				if (!farm.totals.day[local_date]) farm.totals.day[local_date] = new Finance;
+
+				var day_total = farm.totals.day[local_date];
+				var season_index = Math.floor((local_date - 1) / SEASON_DAYS);
+				var season_total = farm.totals.season[season_index];
+
+				day_total.profit.min += harvest.revenue.min;
+				day_total.profit.max += harvest.revenue.max;
+				season_total.profit.min += harvest.revenue.min;
+				season_total.profit.max += harvest.revenue.max;
+				season_total.harvests.min += harvest.yield.min;
+				season_total.harvests.max += harvest.yield.max;
+
+				if (replant){
+					var seed_cost = plan.get_cost();
+					day_total.profit.min -= seed_cost;
+					day_total.profit.max -= seed_cost;
+					season_total.profit.min -= seed_cost;
+					season_total.profit.max -= seed_cost;
+					season_total.plantings += plan.amount;
+				}
+			}
+
+			// Crops such as Ancient Fruit keep regrowing forever indoors.
+			$.each(regrow_roots, function(i, root){
+				var interval = root.plan.crop.regrow;
+				var next_harvest = root.global_plant + root.plan.get_grow_time();
+				if (next_harvest < year_start_global){
+					next_harvest += Math.ceil((year_start_global - next_harvest) / interval) * interval;
+				}
+				for (var h = next_harvest; h <= year_end_global; h += interval){
+					add_carryover_harvest(root.plan, h, false);
+				}
+			});
+
+			// AutoPlant chains such as Starfruit harvest and buy/replant seeds
+			// on the same cadence in every later year.
+			$.each(auto_groups, function(key, entries){
+				entries.sort(function(a, b){ return a.global_plant - b.global_plant; });
+				var persisted = false;
+				for (var i = 0; i < entries.length; i++){
+					if (entries[i].plan.auto_replant){ persisted = true; break; }
+				}
+				if (!persisted){
+					for (var j = 1; j < entries.length; j++){
+						if (entries[j].global_plant - entries[j-1].global_plant === entries[j].grow_time){
+							persisted = true;
+							break;
+						}
+					}
+				}
+				if (!persisted) return;
+
+				var root = entries[0];
+				var next_cycle = root.global_plant + root.grow_time;
+				if (next_cycle < year_start_global){
+					next_cycle += Math.ceil((year_start_global - next_cycle) / root.grow_time) * root.grow_time;
+				}
+				for (var cycle = next_cycle; cycle <= year_end_global; cycle += root.grow_time){
+					add_carryover_harvest(root.plan, cycle, true);
+				}
+			});
+		})();
+
 // Add up annual total
 		for (var i = 0; i < farm.totals.season.length; i++){
 			var season = farm.totals.season[i];
@@ -1738,6 +1855,7 @@ function in_greenhouse(){
 		
 		// Add plan
 		newplan.location = planner.cmode;
+		newplan.auto_replant = !!auto_replant;
 		var plan = new Plan(newplan.get_data(), planner.in_greenhouse());
 		plan.date = date;
 		plan.year_index = this.index;
@@ -1987,6 +2105,7 @@ self.harvests = [];
 		
 		
 		self.location = "farm";
+		self.auto_replant = false;
 init();
 		
 		
@@ -2002,6 +2121,7 @@ init();
 			if (data && data.irrigated) self.irrigated = true;
 			self.greenhouse = in_greenhouse ? true : false;
 			self.location = (data && data.location) ? data.location : (self.greenhouse ? (planner.cmode == 'island' ? 'island' : 'greenhouse') : 'farm');
+			self.auto_replant = !!(data && data.auto_replant);
 		}
 	}
 	
@@ -2013,6 +2133,7 @@ init();
     if (this.fertilizer && !this.fertilizer.is_none()) data.fertilizer = this.fertilizer.id;
     if (this.irrigated) data.irrigated = true;
     if (this.location) data.location = this.location;
+    if (this.auto_replant) data.auto_replant = true;
     return data;
 };
 
