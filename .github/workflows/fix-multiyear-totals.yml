@@ -1,0 +1,33 @@
+name: Fix multi-year totals
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - .github/scripts/fix_multiyear_totals.py
+      - .github/workflows/fix-multiyear-totals.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Preserve farm bucket across years
+        run: python3 .github/scripts/fix_multiyear_totals.py
+      - name: Commit changes
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add planner.js scripts/planner.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Fix greenhouse totals in later years [skip ci]"
+            git push origin gh-pages
+          fi
