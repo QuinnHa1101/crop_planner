@@ -499,11 +499,14 @@ $scope.$apply();
 			y_total.profit.max += season.profit.max;
 		}
 		
-		// Update next year
+		// Update the same location bucket in the next year. Passing the Year
+		// object here used the current UI mode and accidentally redirected
+		// greenhouse/island updates to the main farm in Year 2+.
 		if (full_update){
 			var next_year = farm.year.next();
 			if (!next_year) return;
-			update(next_year, true);
+			var next_farm = farm.greenhouse ? next_year.data.greenhouse : next_year.data.farm;
+			update(next_farm, true);
 		}
 	}
 	
