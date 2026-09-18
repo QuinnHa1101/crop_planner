@@ -2384,6 +2384,7 @@ Plan.prototype.get_grow_time = function(){
 		self.date;
 		self.name = "";
 		self.festival = false;
+		self.forage = false;
 		
 		
 		init();
@@ -2396,20 +2397,22 @@ Plan.prototype.get_grow_time = function(){
 			
 			self.date = (data.season * SEASON_DAYS) + self.day;
 			self.name = data.name;
-			self.festival = data.festival;
+			self.festival = !!data.festival;
+			self.forage = !!data.forage;
 		}
 	}
 	
 	// Get event image
 	CalendarEvent.prototype.get_image = function(){
 		if (this.festival) return "images/flag.gif";
+		if (this.forage) return "images/forage.svg";
 		return "images/people/" + this.name.toLowerCase() + ".png";
 	};
 	
 	// Get readable text of event
 	CalendarEvent.prototype.get_text = function(){
-		if (!this.festival) return this.name + "'s Birthday";
-		return this.name;
+		if (this.festival || this.forage) return this.name;
+		return this.name + "'s Birthday";
 	};
 	
 	

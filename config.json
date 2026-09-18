@@ -791,7 +791,7 @@
         20
       ],
       "regrow": 1,
-      "note": "Matures in 20 days. Produces 1 Tea Leaves each day on days 22\u201328 of Spring/Summer/Fall (and Winter if indoors).",
+      "note": "Matures in 20 days. Produces 1 Tea Leaves each day on days 22–28 of Spring/Summer/Fall (and Winter if indoors).",
       "harvest": {}
     },
     {
@@ -1208,14 +1208,34 @@
         "festival": true
       },
       {
+        "day": 15,
+        "name": "Salmonberry Season",
+        "forage": true
+      },
+      {
         "day": 16,
         "name": "Desert Festival",
         "festival": true
       },
       {
+        "day": 16,
+        "name": "Salmonberry Season",
+        "forage": true
+      },
+      {
         "day": 17,
         "name": "Desert Festival",
         "festival": true
+      },
+      {
+        "day": 17,
+        "name": "Salmonberry Season",
+        "forage": true
+      },
+      {
+        "day": 18,
+        "name": "Salmonberry Season",
+        "forage": true
       },
       {
         "day": 18,
@@ -1304,7 +1324,27 @@
       },
       {
         "day": 5,
-        "name": "Elliot"
+        "name": "Elliott"
+      },
+      {
+        "day": 8,
+        "name": "Blackberry Season",
+        "forage": true
+      },
+      {
+        "day": 9,
+        "name": "Blackberry Season",
+        "forage": true
+      },
+      {
+        "day": 10,
+        "name": "Blackberry Season",
+        "forage": true
+      },
+      {
+        "day": 11,
+        "name": "Blackberry Season",
+        "forage": true
       },
       {
         "day": 11,
@@ -1415,5 +1455,5 @@
       }
     ]
   },
-  "updated_at": "2026-02-08"
+  "updated_at": "2026-09-18"
 }
