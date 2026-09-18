@@ -17,7 +17,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
 	
 	<script src="./scripts/checklist-model.js"></script>	
-	<script src="./scripts/planner.js?v=recommendfix-20260918"></script>
+	<script src="./scripts/planner.js?v=alwaysrecommend-20260918"></script>
 
 <style>
 .loc_badge{
@@ -450,11 +450,11 @@
 					<h4 class="modal-title">{{self.get_date(self.cdate, '%F &ensp;&mdash;&ensp; %l the %j%S')}}</h4>
 				</div>
 				<div class="modal-body">
-					<!-- Crop suggestions: shown on any day with no existing plans and at least one valid crop.
+					<!-- Crop suggestions: always shown when at least one valid crop fits the selected date.
 					     Covers both "replanting after a harvest" and "what should I plant here?" at the start of the season.
 					     Regrowable-harvest days are suppressed — those plots are still in use. -->
 					<div class="replant-suggestions"
-						ng-show="!self.calendar_plans(self.cdate).length && !self.has_regrowth_on_day(self.cdate) && self.best_fit_crops(self.cdate, 3).length">
+						ng-show="self.best_fit_crops(self.cdate, 3).length">
 						<div class="replant-label">
 							<i class="fa fa-leaf"></i>
 							<span ng-show="self.calendar_harvests(self.cdate).length">Suggested replantings</span>
