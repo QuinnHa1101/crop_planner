@@ -1,0 +1,38 @@
+name: Fix Elliott birthday avatar
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - .github/scripts/fix_elliott_avatar.py
+      - .github/workflows/fix-elliott-avatar.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Fix Elliott avatar mapping
+        run: python3 .github/scripts/fix_elliott_avatar.py
+      - name: Validate planner
+        run: |
+          node --check scripts/planner.js
+          node --check planner.js
+          test -f images/people/elliot.png
+          git diff --check
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html planner.js scripts/planner.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Fix Elliott birthday avatar [skip ci]"
+            git push origin gh-pages
+          fi
