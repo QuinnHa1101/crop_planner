@@ -2406,7 +2406,10 @@ Plan.prototype.get_grow_time = function(){
 	CalendarEvent.prototype.get_image = function(){
 		if (this.festival) return "images/flag.gif";
 		if (this.forage) return "images/forage.svg";
-		return "images/people/" + this.name.toLowerCase() + ".png";
+		var image_name = this.name.toLowerCase();
+		// The bundled portrait asset keeps the original one-t filename.
+		if (image_name == "elliott") image_name = "elliot";
+		return "images/people/" + image_name + ".png";
 	};
 	
 	// Get readable text of event
