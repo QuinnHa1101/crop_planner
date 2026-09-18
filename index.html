@@ -17,7 +17,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
 	
 	<script src="./scripts/checklist-model.js"></script>	
-	<script src="./scripts/planner.js?v=seedsource-20260911"></script>
+	<script src="./scripts/planner.js?v=recommendfix-20260918"></script>
 
 <style>
 .loc_badge{
@@ -450,6 +450,29 @@
 					<h4 class="modal-title">{{self.get_date(self.cdate, '%F &ensp;&mdash;&ensp; %l the %j%S')}}</h4>
 				</div>
 				<div class="modal-body">
+					<!-- Crop suggestions: shown on any day with no existing plans and at least one valid crop.
+					     Covers both "replanting after a harvest" and "what should I plant here?" at the start of the season.
+					     Regrowable-harvest days are suppressed — those plots are still in use. -->
+					<div class="replant-suggestions"
+						ng-show="!self.calendar_plans(self.cdate).length && !self.has_regrowth_on_day(self.cdate) && self.best_fit_crops(self.cdate, 3).length">
+						<div class="replant-label">
+							<i class="fa fa-leaf"></i>
+							<span ng-show="self.calendar_harvests(self.cdate).length">Suggested replantings</span>
+							<span ng-show="!self.calendar_harvests(self.cdate).length">Suggested crops</span>
+						</div>
+						<div class="replant-chips">
+							<div class="replant-chip"
+								ng-repeat="crop in self.best_fit_crops(self.cdate, 3)"
+								ng-click="self.suggest_crop(crop, self.cdate)"
+								ng-class="{'replant-chip-active': self.newplan.crop_id == crop.id}"
+								title="{{crop.name}} — {{crop.grow}} days to grow">
+								<img ng-src="{{crop.get_image(1)}}">
+								<span class="replant-chip-name">{{crop.name}}</span>
+								<span class="replant-chip-meta">{{crop.grow}}d &middot; {{crop.profit > 0 ? '+' : ''}}{{crop.profit}}g/d</span>
+							</div>
+						</div>
+					</div>
+
 					<div class="plant_crop">
 						<div class="row">
 							<div class="col-md-4 col-xs-12">
@@ -556,28 +579,7 @@
 							<br>
 					</div>
 
-					<!-- Crop suggestions: shown on any day with no existing plans and at least one valid crop.
-					     Covers both "replanting after a harvest" and "what should I plant here?" at the start of the season.
-					     Regrowable-harvest days are suppressed — those plots are still in use. -->
-					<div class="replant-suggestions"
-						ng-show="!self.calendar_plans(self.cdate).length && !self.has_regrowth_on_day(self.cdate) && self.best_fit_crops(self.cdate, 3).length">
-						<div class="replant-label">
-							<i class="fa fa-leaf"></i>
-							<span ng-show="self.calendar_harvests(self.cdate).length">Suggested replantings</span>
-							<span ng-show="!self.calendar_harvests(self.cdate).length">Suggested crops</span>
-						</div>
-						<div class="replant-chips">
-							<div class="replant-chip"
-								ng-repeat="crop in self.best_fit_crops(self.cdate, 3)"
-								ng-click="self.suggest_crop(crop, self.cdate)"
-								ng-class="{'replant-chip-active': self.newplan.crop_id == crop.id}"
-								title="{{crop.name}} — {{crop.grow}} days to grow">
-								<img ng-src="{{crop.get_image(1)}}">
-								<span class="replant-chip-name">{{crop.name}}</span>
-								<span class="replant-chip-meta">{{crop.grow}}d &middot; {{crop.profit > 0 ? '+' : ''}}{{crop.profit}}g/d</span>
-							</div>
-						</div>
-					</div>
+
 
 					<div ng-show="self.calendar_plans(self.cdate).length">
 						<div class="panel panel-default">
