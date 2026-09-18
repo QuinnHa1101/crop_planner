@@ -1,0 +1,39 @@
+name: Add forage calendar events
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - .github/scripts/add_forage_events.py
+      - .github/workflows/add-forage-events.yml
+      - images/forage.svg
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Add forage events
+        run: python3 .github/scripts/add_forage_events.py
+      - name: Validate planner
+        run: |
+          python3 -m json.tool config.json >/dev/null
+          node --check scripts/planner.js
+          node --check planner.js
+          git diff --check
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.json index.html planner.js scripts/planner.js images/forage.svg
+          if ! git diff --cached --quiet; then
+            git commit -m "Add forage calendar events [skip ci]"
+            git push origin gh-pages
+          fi
