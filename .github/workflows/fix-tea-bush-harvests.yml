@@ -1,0 +1,38 @@
+name: Fix Tea Bush harvest schedule
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - .github/scripts/fix_tea_bush_harvests.py
+      - .github/workflows/fix-tea-bush-harvests.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Correct Tea Bush behavior
+        run: python3 .github/scripts/fix_tea_bush_harvests.py
+      - name: Validate planner
+        run: |
+          python3 -m json.tool config.json >/dev/null
+          node --check scripts/planner.js
+          node --check planner.js
+          git diff --check
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.json index.html planner.js scripts/planner.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Correct Tea Bush harvest schedule [skip ci]"
+            git push origin gh-pages
+          fi
