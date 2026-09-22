@@ -369,7 +369,8 @@ $scope.$apply();
 				if (crop.tea_bush){
 					// Tea matures after 20 days but only yields during the final week.
 					// Outdoors there is no Winter harvest; indoors Winter 22-28 is valid.
-					var final_season = farm.greenhouse ? 3 : 2;
+					var tea_location = plan.location || (farm.greenhouse ? "greenhouse" : "farm");
+					var final_season = tea_location === "greenhouse" ? 3 : 2;
 					for (var tea_season = 0; tea_season <= final_season; tea_season++){
 						for (var tea_day = 22; tea_day <= 28; tea_day++){
 							var tea_date = (tea_season * SEASON_DAYS) + tea_day;
@@ -544,7 +545,7 @@ $scope.$apply();
 						if (farm.greenhouse ? location === "farm" : location !== "farm") return;
 
 						var maturity_global = (yi * YEAR_DAYS) + pdate + plan.get_grow_time();
-						var final_season = farm.greenhouse ? 3 : 2;
+						var final_season = location === "greenhouse" ? 3 : 2;
 						for (var season_index = 0; season_index <= final_season; season_index++){
 							for (var season_day = 22; season_day <= 28; season_day++){
 								var local_date = (season_index * SEASON_DAYS) + season_day;
