@@ -791,8 +791,9 @@
         20
       ],
       "regrow": 1,
-      "note": "Matures in 20 days. Produces 1 Tea Leaves each day on days 22–28 of Spring/Summer/Fall (and Winter if indoors).",
-      "harvest": {}
+      "note": "Takes 20 days to mature. Produces 1 Tea Leaf daily on days 22–28 of Spring, Summer, and Fall; also Winter days 22–28 when indoors. Grows in every season without watering and does not use fertilizer.",
+      "harvest": {},
+      "tea_bush": true
     },
     {
       "buy": 50,
@@ -1455,5 +1456,5 @@
       }
     ]
   },
-  "updated_at": "2026-09-18"
+  "updated_at": "2026-09-22"
 }

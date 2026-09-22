@@ -365,17 +365,30 @@ $scope.$apply();
 				}
 				if (first_harvest > crop_end) return;
 				
-				// Initial harvest
 				var harvests = [];
-				harvests.push(new Harvest(plan, first_harvest, false, farm.year.index));
-				
-				// Regrowth harvests
-				if (crop.regrow){
-					var regrowths = Math.floor((crop_end - first_harvest) / crop.regrow);
-					for (var i = 1; i <= regrowths; i++){
-						var regrow_date = first_harvest + (i * crop.regrow);
-						if (regrow_date > crop_end) break;
-						harvests.push(new Harvest(plan, regrow_date, true, farm.year.index));
+				if (crop.tea_bush){
+					// Tea matures after 20 days but only yields during the final week.
+					// Outdoors there is no Winter harvest; indoors Winter 22-28 is valid.
+					var final_season = farm.greenhouse ? 3 : 2;
+					for (var tea_season = 0; tea_season <= final_season; tea_season++){
+						for (var tea_day = 22; tea_day <= 28; tea_day++){
+							var tea_date = (tea_season * SEASON_DAYS) + tea_day;
+							if (tea_date < first_harvest || tea_date > crop_end) continue;
+							harvests.push(new Harvest(plan, tea_date, tea_date > first_harvest, farm.year.index));
+						}
+					}
+				} else {
+					// Initial harvest
+					harvests.push(new Harvest(plan, first_harvest, false, farm.year.index));
+
+					// Regrowth harvests
+					if (crop.regrow){
+						var regrowths = Math.floor((crop_end - first_harvest) / crop.regrow);
+						for (var i = 1; i <= regrowths; i++){
+							var regrow_date = first_harvest + (i * crop.regrow);
+							if (regrow_date > crop_end) break;
+							harvests.push(new Harvest(plan, regrow_date, true, farm.year.index));
+						}
 					}
 				}
 				
@@ -492,6 +505,58 @@ $scope.$apply();
 		})();
 
 
+
+		// --- Tea Bush carry-over and fixed harvest windows ---
+		// Tea Bushes persist across years. Mature bushes produce only on days
+		// 22-28 of Spring/Summer/Fall, plus Winter when indoors.
+		(function add_prior_year_tea_harvests(){
+			var cy = farm.year.index;
+			if (cy <= 0) return;
+
+			function add_tea_harvest(plan, local_date){
+				var harvest = new Harvest(plan, local_date, true, cy);
+				if (!farm.harvests[local_date]) farm.harvests[local_date] = [];
+				farm.harvests[local_date].push(harvest);
+				if (!farm.totals.day[local_date]) farm.totals.day[local_date] = new Finance;
+
+				var day_total = farm.totals.day[local_date];
+				var season_index = Math.floor((local_date - 1) / SEASON_DAYS);
+				var season_total = farm.totals.season[season_index];
+				day_total.profit.min += harvest.revenue.min;
+				day_total.profit.max += harvest.revenue.max;
+				season_total.profit.min += harvest.revenue.min;
+				season_total.profit.max += harvest.revenue.max;
+				season_total.harvests.min += harvest.yield.min;
+				season_total.harvests.max += harvest.yield.max;
+			}
+
+			for (var yi = 0; yi < cy; yi++){
+				var previous_year = self.years[yi];
+				if (!previous_year || !previous_year.data) continue;
+				var previous_farm = farm.greenhouse ? previous_year.data.greenhouse : previous_year.data.farm;
+				if (!previous_farm || !previous_farm.plans) continue;
+
+				$.each(previous_farm.plans, function(pdate, plans){
+					pdate = parseInt(pdate);
+					$.each(plans || [], function(i, plan){
+						if (!plan || !plan.crop || !plan.crop.tea_bush) return;
+						var location = plan.location || (farm.greenhouse ? "greenhouse" : "farm");
+						if (farm.greenhouse ? location === "farm" : location !== "farm") return;
+
+						var maturity_global = (yi * YEAR_DAYS) + pdate + plan.get_grow_time();
+						var final_season = farm.greenhouse ? 3 : 2;
+						for (var season_index = 0; season_index <= final_season; season_index++){
+							for (var season_day = 22; season_day <= 28; season_day++){
+								var local_date = (season_index * SEASON_DAYS) + season_day;
+								var global_date = (cy * YEAR_DAYS) + local_date;
+								if (global_date >= maturity_global) add_tea_harvest(plan, local_date);
+							}
+						}
+					});
+				});
+			}
+		})();
+
 		// --- Greenhouse / Ginger Island crop carry-over across years ---
 		// Regrowing crops persist automatically. Non-regrowing crops persist only
 		// when AutoPlant was selected (legacy saved chains are inferred by cadence).
@@ -523,6 +588,7 @@ $scope.$apply();
 						if (!grow_time) return;
 						var global_plant = (yi * YEAR_DAYS) + pdate;
 						if (plan.crop.regrow){
+							if (plan.crop.tea_bush) return;
 							regrow_roots.push({plan: plan, global_plant: global_plant});
 							return;
 						}
@@ -1054,7 +1120,7 @@ function in_greenhouse(){
 	function on_crop_change(){
 		self.newplan.irrigated = false;
 		var crop = self.crops[self.newplan.crop_id];
-		if (crop && crop.tree){
+		if (crop && (crop.tree || crop.tea_bush)){
 			// Trees cannot use fertilizer in-game, force None and disable UI.
 			self.newplan.fertilizer = self.fertilizer["none"];
 		}
@@ -1613,6 +1679,7 @@ function in_greenhouse(){
 		self.stages = [];
 		self.regrow;
 		self.wild = false;
+		self.tea_bush = false;
 		
 		// Harvest data
 		self.harvest = {
@@ -1649,6 +1716,7 @@ function in_greenhouse(){
 			self.group = self.tree ? "Fruit Trees" : "Crops";
 			if (data.wild) self.wild = true;
 			if (data.no_suggest) self.no_suggest = true;
+			self.tea_bush = !!data.tea_bush;
 			
 			// Harvest data
 			if (data.harvest.min) self.harvest.min = data.harvest.min;
@@ -1860,7 +1928,7 @@ function in_greenhouse(){
 		newplan.crop = crop;
 
 		// Fruit tree rules: can be planted any season, never uses fertilizer or irrigated growth bonuses.
-		if (crop.tree){
+		if (crop.tree || crop.tea_bush){
 			newplan.irrigated = false;
 			if (!newplan.fertilizer || !newplan.fertilizer.id){
 				newplan.fertilizer = planner.fertilizer["none"];
@@ -2193,7 +2261,7 @@ Plan.prototype.get_grow_time = function(){
 	var stages = $.extend([], this.crop.stages);
 
 	// Fruit trees ignore fertilizer, irrigated growth reduction, and agriculturist speed bonuses.
-	if (this.crop && this.crop.tree){
+	if (this.crop && (this.crop.tree || this.crop.tea_bush)){
 		var tdays = 0;
 		for (var t = 0; t < stages.length; t++) tdays += stages[t];
 		return tdays;
