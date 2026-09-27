@@ -1477,5 +1477,17 @@
       }
     ]
   },
-  "updated_at": "2026-09-27"
+  "updated_at": "2026-09-27",
+  "reminders": [
+    {
+      "id": "greenhouse_fruit_collection",
+      "name": "Collect greenhouse fruit",
+      "start_year": 2,
+      "start_season": "fall",
+      "start_day": 22,
+      "interval_days": 3,
+      "location": "greenhouse",
+      "note": "Collect every 3 days. Greenhouse fruit trees produce one fruit daily and hold up to 3 fruits."
+    }
+  ]
 }

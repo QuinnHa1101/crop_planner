@@ -53,6 +53,7 @@ function planner_controller($scope){
 	self.crops = {}; 					// {id: {data}}	
 	self.fertilizer = {}; 				// [fertilizer, fertilizer, ...]
 	self.events = {};					// Birthdays & festivals
+	self.reminders = [];				// Recurring planner reminders
 	
 	// State objects & variables
 	self.years = [];
@@ -201,6 +202,9 @@ function planner_controller($scope){
 						self.events[c_event.date].push(c_event);
 					});
 				});
+				
+				// Load recurring reminders from config.
+				self.reminders = config.reminders || [];
 				
 				// Create newplan template
 				self.newplan = new Plan;
@@ -926,6 +930,29 @@ $scope.$apply();
 		});
 	}
 
+	// Return recurring reminders for a date in the currently selected year.
+	// A continuous day index keeps the cadence correct across seasons and years.
+	function calendar_reminders(date){
+		if (!self.cyear || !date) return [];
+		var results = [];
+		var season_order = ["spring", "summer", "fall", "winter"];
+		var current_global_day = (self.cyear.index * YEAR_DAYS) + date;
+
+		$.each(self.reminders || [], function(i, reminder){
+			var season_index = season_order.indexOf(reminder.start_season);
+			if (season_index < 0) return;
+			var start_year_index = Math.max(0, parseInt(reminder.start_year || 1) - 1);
+			var start_day = parseInt(reminder.start_day || 1);
+			var start_global_day = (start_year_index * YEAR_DAYS) + (season_index * SEASON_DAYS) + start_day;
+			var interval = Math.max(1, parseInt(reminder.interval_days || 1));
+			if (current_global_day >= start_global_day && (current_global_day - start_global_day) % interval === 0){
+				results.push(reminder);
+			}
+		});
+
+		return results;
+	}
+
 	function calendar_totals_day(date){
 		var fin = new Finance;
 		var a = (self.cyear.data.farm && self.cyear.data.farm.totals && self.cyear.data.farm.totals.day && self.cyear.data.farm.totals.day[date]) ? self.cyear.data.farm.totals.day[date] : null;
@@ -993,6 +1020,7 @@ $scope.$apply();
 
 	self.calendar_plans = calendar_plans;
 	self.calendar_harvests = calendar_harvests;
+	self.calendar_reminders = calendar_reminders;
 	self.calendar_totals_day = calendar_totals_day;
 	self.calendar_totals_season = calendar_totals_season;
 

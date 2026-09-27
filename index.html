@@ -17,7 +17,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
 	
 	<script src="./scripts/checklist-model.js"></script>	
-	<script src="./scripts/planner.js?v=gold-seed-costs-20260927"></script>
+	<script src="./scripts/planner.js?v=greenhouse-fruit-reminder-20260927"></script>
 
 <style>
 .loc_badge{
@@ -33,6 +33,8 @@
 }
 .plan{ position:relative; }
 .loc_inline{ opacity:0.7; font-size: 0.9em; }
+.calendar-reminder .fa{ color:#f1b83b; font-size:15px; margin-right:3px; }
+.reminder-panel{ border-left:4px solid #f1b83b; }
 </style>
 
 </head>
@@ -157,7 +159,7 @@
 					<div class="day_name">Su</div>
 				</div>
 				<div class="day_container">
-					<div class="day" ng-repeat="date in self.days | limitTo:self.SEASON_DAYS:self.cseason.start-1" ng-click="self.open_plans(date)" ng-class="{'filled': self.calendar_plans(date).length || self.calendar_harvests(date).length, 'has-planting': self.calendar_plans(date).length > 0 && self.calendar_harvests(date).length == 0, 'has-harvest': self.calendar_plans(date).length == 0 && self.calendar_harvests(date).length > 0, 'has-both': self.calendar_plans(date).length > 0 && self.calendar_harvests(date).length > 0}">
+					<div class="day" ng-repeat="date in self.days | limitTo:self.SEASON_DAYS:self.cseason.start-1" ng-click="self.open_plans(date)" ng-class="{'filled': self.calendar_plans(date).length || self.calendar_harvests(date).length || self.calendar_reminders(date).length, 'has-planting': self.calendar_plans(date).length > 0 && self.calendar_harvests(date).length == 0, 'has-harvest': self.calendar_plans(date).length == 0 && self.calendar_harvests(date).length > 0, 'has-both': self.calendar_plans(date).length > 0 && self.calendar_harvests(date).length > 0}">
 						
 						<div class="date_top">
 							<div class="date">
@@ -167,6 +169,10 @@
 							<div class="event" ng-repeat="ev in self.events[date] | orderBy:['!festival','name']" ng-show="self.player.settings.show_events" title="{{ev.get_text()}}">
 								<img ng-src="{{ev.get_image()}}">
 								<span>{{ev.get_text()}}</span>
+							</div>
+							<div class="event calendar-reminder" ng-repeat="reminder in self.calendar_reminders(date)" title="{{reminder.note}}">
+								<i class="fa fa-bell"></i>
+								<span>{{reminder.name}}</span>
 							</div>
 						</div>
 						
@@ -470,6 +476,13 @@
 								<span class="replant-chip-name">{{crop.name}}</span>
 								<span class="replant-chip-meta">{{crop.grow}}d &middot; {{crop.profit > 0 ? '+' : ''}}{{crop.profit}}g/d</span>
 							</div>
+						</div>
+					</div>
+
+					<div class="alert alert-warning reminder-panel" ng-show="self.calendar_reminders(self.cdate).length">
+						<div ng-repeat="reminder in self.calendar_reminders(self.cdate)">
+							<i class="fa fa-bell"></i> <b>{{reminder.name}}</b><br>
+							<span>{{reminder.note}}</span>
 						</div>
 					</div>
 
