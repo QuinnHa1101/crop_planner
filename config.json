@@ -19,7 +19,7 @@
       ]
     },
     {
-      "buy": 700,
+      "buy": 0,
       "harvest": {},
       "id": "ancient_fruit",
       "index": 499,
@@ -37,7 +37,10 @@
         7,
         7,
         5
-      ]
+      ],
+      "note": "Not sold for Gold. Obtain from the Museum recipe, Seed Maker, or other special sources. Gold seed cost is excluded.",
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "buy": 30,
@@ -133,7 +136,7 @@
       ]
     },
     {
-      "buy": 40,
+      "buy": 0,
       "harvest": {},
       "id": "broccoli",
       "index": 748,
@@ -149,7 +152,9 @@
         2
       ],
       "regrow": 4,
-      "note": "Seeds not sold (1.6+); obtained from Seed Spots/Raccoon/etc. Buy value set to seed sell price for planning."
+      "note": "Not sold for Gold. Obtain from Seed Spots, Raccoon requests/trades, Seed Maker, or other special sources. Gold seed cost is excluded.",
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "id": "cactus_seeds",
@@ -175,7 +180,7 @@
       "harvest": {}
     },
     {
-      "buy": 15,
+      "buy": 0,
       "harvest": {},
       "id": "carrot",
       "index": 746,
@@ -189,7 +194,9 @@
         1,
         1
       ],
-      "note": "Seeds not sold (1.6+); obtained from Seed Spots/Raccoon/etc. Buy value set to seed sell price for planning."
+      "note": "Not sold for Gold. Obtain from Seed Spots, Raccoon requests/trades, Seed Maker, or other special sources. Gold seed cost is excluded.",
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "buy": 80,
@@ -210,7 +217,7 @@
       ]
     },
     {
-      "buy": 30,
+      "buy": 2500,
       "harvest": {
         "extra_chance": 0.02,
         "level_increase": 10,
@@ -220,7 +227,7 @@
       "id": "coffee_bean",
       "index": 433,
       "name": "Coffee Bean",
-      "note": "Sold by Travelling Cart for ~2500g",
+      "note": "Sold by the Traveling Cart for 2,500g; also obtainable as a monster drop.",
       "regrow": 2,
       "seasons": [
         "spring",
@@ -535,7 +542,7 @@
       ]
     },
     {
-      "buy": 20,
+      "buy": 0,
       "harvest": {},
       "id": "powdermelon",
       "index": 749,
@@ -551,7 +558,9 @@
         2,
         2
       ],
-      "note": "Seeds not sold (1.6+); obtained from Seed Spots/Raccoon/etc. Buy value set to seed sell price for planning."
+      "note": "Not sold for Gold. Obtain from Seed Spots, Raccoon requests/trades, Seed Maker, or other special sources. Gold seed cost is excluded.",
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "buy": 100,
@@ -627,7 +636,7 @@
     {
       "id": "rice_shoot",
       "name": "Rice Shoot (Unmilled Rice)",
-      "buy": 33,
+      "buy": 40,
       "sell": 33,
       "seasons": [
         "spring"
@@ -639,7 +648,7 @@
         3
       ],
       "regrow": 0,
-      "note": "Base growth 8 days (6 if irrigated/near water). Planner assumes 8 days.",
+      "note": "Pierre sells Rice Shoots for 40g starting in Year 2. Base growth is 8 days (6 if irrigated/near water); planner assumes 8 days unless Irrigated is selected.",
       "harvest": {}
     },
     {
@@ -702,7 +711,7 @@
       ]
     },
     {
-      "buy": 20,
+      "buy": 0,
       "harvest": {},
       "id": "summer_squash",
       "index": 747,
@@ -719,7 +728,9 @@
         2
       ],
       "regrow": 3,
-      "note": "Seeds not sold (1.6+); obtained from Seed Spots/Raccoon/etc. Buy value set to seed sell price for planning."
+      "note": "Not sold for Gold. Obtain from Seed Spots, Raccoon requests/trades, Seed Maker, or other special sources. Gold seed cost is excluded.",
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "buy": 125,
@@ -761,7 +772,7 @@
     {
       "id": "taro_tuber",
       "name": "Taro Tuber (Taro Root)",
-      "buy": 100,
+      "buy": 0,
       "sell": 100,
       "seasons": [
         "summer"
@@ -773,13 +784,15 @@
         4
       ],
       "regrow": 0,
-      "note": "Base growth 10 days (7 if irrigated/near water). Summer in the Valley; all seasons on Ginger Island. Planner assumes 10 days.",
-      "harvest": {}
+      "note": "Not sold for Gold. Exchange 2 Bone Fragments at the Island Trader or obtain from other sources; exchange resources are not converted to Gold cost.",
+      "harvest": {},
+      "gold_purchasable": false,
+      "acquisition": "exchange"
     },
     {
       "id": "tea_sapling",
       "name": "Tea Sapling (Tea Bush)",
-      "buy": 50,
+      "buy": 750,
       "sell": 50,
       "seasons": [
         "spring",
@@ -791,7 +804,7 @@
         20
       ],
       "regrow": 1,
-      "note": "Takes 20 days to mature. Produces 1 Tea Leaf daily on days 22–28 of Spring, Summer, and Fall; also Winter days 22–28 when indoors. Grows in every season without watering and does not use fertilizer.",
+      "note": "Traveling Cart purchase price starts at 750g; also craftable or exchangeable for 10 Calico Eggs at the Desert Festival. Takes 20 days to mature and produces Tea Leaves on days 22–28.",
       "harvest": {},
       "tea_bush": true
     },
@@ -875,7 +888,7 @@
     {
       "id": "fiber_seeds",
       "name": "Fiber Seeds",
-      "buy": 2,
+      "buy": 0,
       "sell": 2,
       "seasons": [
         "spring",
@@ -889,13 +902,15 @@
         2,
         2
       ],
-      "note": "Crafted (5 Mixed Seeds + 5 Fiber + 5 Sap). Grows in 7 days in any season. Yields ~1-3 Fiber.",
-      "harvest": {}
+      "note": "Crafted after Linus's Community Cleanup special order. Not sold for Gold; Gold seed cost is excluded.",
+      "harvest": {},
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "id": "spring_seeds",
       "name": "Spring Seeds",
-      "buy": 1,
+      "buy": 105,
       "sell": 35,
       "seasons": [
         "spring"
@@ -912,12 +927,12 @@
         "level_increase": 7
       },
       "wild": true,
-      "note": "Crafted from Spring forage. Grows in 7 days. Yields random Spring forage (avg ~35g)."
+      "note": "Craftable from Spring forage; Traveling Cart price starts at 105g. Planner uses the minimum verified Gold purchase price."
     },
     {
       "id": "summer_seeds",
       "name": "Summer Seeds",
-      "buy": 1,
+      "buy": 165,
       "sell": 80,
       "seasons": [
         "summer"
@@ -934,12 +949,12 @@
         "level_increase": 7
       },
       "wild": true,
-      "note": "Crafted from Summer forage. Grows in 7 days. Yields random Summer forage (avg ~80g)."
+      "note": "Craftable from Summer forage; Traveling Cart price starts at 165g. Planner uses the minimum verified Gold purchase price."
     },
     {
       "id": "fall_seeds",
       "name": "Fall Seeds",
-      "buy": 1,
+      "buy": 135,
       "sell": 78,
       "seasons": [
         "fall"
@@ -956,12 +971,12 @@
         "level_increase": 7
       },
       "wild": true,
-      "note": "Crafted from Fall forage. Grows in 7 days. Yields random Fall forage (avg ~78g)."
+      "note": "Craftable from Fall forage; Traveling Cart price starts at 135g. Planner uses the minimum verified Gold purchase price."
     },
     {
       "id": "winter_seeds",
       "name": "Winter Seeds",
-      "buy": 1,
+      "buy": 100,
       "sell": 30,
       "seasons": [
         "winter"
@@ -978,12 +993,12 @@
         "level_increase": 7
       },
       "wild": true,
-      "note": "Crafted from Winter forage. Grows in 7 days. Yields random Winter forage (avg ~30g)."
+      "note": "Craftable from Winter forage; Traveling Cart price starts at 100g. Planner uses the minimum verified Gold purchase price."
     },
     {
       "id": "qi_beans",
       "name": "Qi Beans",
-      "buy": 1,
+      "buy": 0,
       "sell": 1,
       "seasons": [
         "spring",
@@ -997,9 +1012,11 @@
         1,
         1
       ],
-      "note": "Dropped by monsters during 'Extended Family' special order. Grows in 4 days into Qi Fruit. Used for Qi Gem exchange. Not suggested by planner (event-only availability). Add images/seeds/qi_beans.png and images/crops/qi_beans.png.",
+      "note": "Quest-only seed for Qi's Crop. Not sold for Gold; Gold seed cost is excluded and the crop is not auto-suggested.",
       "harvest": {},
-      "no_suggest": true
+      "no_suggest": true,
+      "gold_purchasable": false,
+      "acquisition": "not_sold"
     },
     {
       "buy": 2000,
@@ -1104,7 +1121,7 @@
       "note": "Fruit tree. Takes 28 days to mature. Produces daily in-season (year-round in Greenhouse/Ginger Island). No fertilizer."
     },
     {
-      "buy": 130,
+      "buy": 0,
       "harvest": {},
       "id": "mango_tree",
       "index": 756,
@@ -1118,10 +1135,12 @@
       ],
       "regrow": 1,
       "tree": true,
-      "note": "Fruit tree. Takes 28 days to mature. Produces daily in-season (year-round on Ginger Island / in Greenhouse). Not sold at Pierre; obtained on Ginger Island (Island Trader / Golden Coconut). No fertilizer."
+      "note": "Not sold for Gold. Exchange 75 Mussels at the Island Trader or obtain from Ginger Island sources; exchange resources are not converted to Gold cost.",
+      "gold_purchasable": false,
+      "acquisition": "exchange"
     },
     {
-      "buy": 150,
+      "buy": 0,
       "harvest": {},
       "id": "banana_tree",
       "index": 757,
@@ -1135,7 +1154,9 @@
       ],
       "regrow": 1,
       "tree": true,
-      "note": "Fruit tree. Takes 28 days to mature. Produces daily in-season (year-round on Ginger Island / in Greenhouse). Not sold at Pierre; obtained on Ginger Island (Island Trader / Golden Coconut). No fertilizer."
+      "note": "Not sold for Gold. Exchange 5 Dragon Teeth at the Island Trader or 100 Calico Eggs at the Desert Festival; exchange resources are not converted to Gold cost.",
+      "gold_purchasable": false,
+      "acquisition": "exchange"
     }
   ],
   "fertilizer": [
@@ -1456,5 +1477,5 @@
       }
     ]
   },
-  "updated_at": "2026-09-22"
+  "updated_at": "2026-09-27"
 }

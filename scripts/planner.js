@@ -732,6 +732,10 @@ $scope.$apply();
 			var gold = parseInt(match[1] || 0);
 			var crop = self.crops[self.newplan.crop_id];
 			if (!crop) return;
+			if (!crop.buy){
+				alert("This seed has no Gold purchase price. Enter a quantity instead.");
+				return false;
+			}
 			amount = Math.floor(gold / crop.buy);
 			amount = amount || 1;
 			self.newplan.amount = amount;
@@ -2192,11 +2196,6 @@ self.harvests = [];
 		self.location = "farm";
 		self.auto_replant = false;
 		self.is_auto_replant_cycle = false;
-		self.seed_source = "buy_all";
-		self.paid_seed_count = 0;
-		self.replant_same_source = true;
-		self.replant_seed_source = "buy_all";
-		self.replant_paid_seed_count = 0;
 init();
 		
 		
@@ -2214,11 +2213,6 @@ init();
 			self.location = (data && data.location) ? data.location : (self.greenhouse ? (planner.cmode == 'island' ? 'island' : 'greenhouse') : 'farm');
 			self.auto_replant = !!(data && data.auto_replant);
 			self.is_auto_replant_cycle = !!(data && data.is_auto_replant_cycle);
-			self.seed_source = data.seed_source || "buy_all";
-			self.paid_seed_count = parseInt(data.paid_seed_count || 0);
-			self.replant_same_source = data.replant_same_source !== false;
-			self.replant_seed_source = data.replant_seed_source || "buy_all";
-			self.replant_paid_seed_count = parseInt(data.replant_paid_seed_count || 0);
 		}
 	}
 	
@@ -2232,13 +2226,6 @@ init();
     if (this.location) data.location = this.location;
     if (this.auto_replant) data.auto_replant = true;
     if (this.is_auto_replant_cycle) data.is_auto_replant_cycle = true;
-    data.seed_source = this.seed_source || "buy_all";
-    if (this.seed_source == "mixed") data.paid_seed_count = this.get_paid_seed_count(false);
-    data.replant_same_source = this.replant_same_source !== false;
-    if (this.replant_same_source === false){
-        data.replant_seed_source = this.replant_seed_source || "buy_all";
-        if (this.replant_seed_source == "mixed") data.replant_paid_seed_count = this.get_paid_seed_count(true);
-    }
     return data;
 };
 
@@ -2312,33 +2299,11 @@ Plan.prototype.get_grow_time = function(){
 };
 	
 
-	Plan.prototype.get_paid_seed_count = function(replant){
-		var amount = Math.max(0, parseInt(this.amount || 0));
-		var use_replant = !!replant || !!this.is_auto_replant_cycle;
-		var separate_replant = use_replant && this.replant_same_source === false;
-		var source = separate_replant ? this.replant_seed_source : this.seed_source;
-		var custom_count = separate_replant ? this.replant_paid_seed_count : this.paid_seed_count;
-
-		source = source || "buy_all";
-		if (source == "existing_free") return 0;
-		if (source == "buy_all") return amount;
-
-		custom_count = parseInt(custom_count || 0);
-		return Math.max(0, Math.min(amount, custom_count));
-	};
-
-	Plan.prototype.get_seed_source_label = function(replant){
-		var use_replant = !!replant || !!this.is_auto_replant_cycle;
-		var separate_replant = use_replant && this.replant_same_source === false;
-		var source = separate_replant ? this.replant_seed_source : this.seed_source;
-		if (source == "existing_free") return "Existing/free";
-		if (source == "mixed") return "Mixed";
-		return "Buy all";
-	};
-
-	Plan.prototype.get_cost = function(locale, replant){
+	// All purchasable seeds default to Buy all. Seeds that cannot be purchased
+	// with Gold have buy=0 in config, so exchanges/free sources add no Gold cost.
+	Plan.prototype.get_cost = function(locale){
 		var crop_price = this.crop && this.crop.buy ? this.crop.buy : 0;
-		var amount = crop_price * this.get_paid_seed_count(replant);
+		var amount = crop_price * Math.max(0, parseInt(this.amount || 0));
 		if (locale) return amount.toLocaleString();
 		return amount;
 	};

@@ -17,7 +17,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
 	
 	<script src="./scripts/checklist-model.js"></script>	
-	<script src="./scripts/planner.js?v=teabush2-20260922"></script>
+	<script src="./scripts/planner.js?v=gold-seed-costs-20260927"></script>
 
 <style>
 .loc_badge{
@@ -279,7 +279,7 @@
 											<span class="text-muted" ng-show="crop.harvest.min>1">(x{{crop.harvest.min}})</span>
 										</td>
 										<td>{{crop.grow}}</td>
-										<td>{{crop.buy}}g</td>
+										<td>{{crop.buy ? (crop.buy + 'g') : 'No Gold cost'}}</td>
 										<td>{{crop.get_sell()}}g</td>
 										<td>
 											<span ng-show="!self.cinfo_settings.use_fbp">{{crop.profit}}g</span>
@@ -315,7 +315,7 @@
 							</tr>
 							<tr>
 								<th><i class="fa fa-fw fa-minus-square"></i> Buy</th>
-								<td>{{self.sidebar.crop.buy}}g</td>
+								<td>{{self.sidebar.crop.buy ? (self.sidebar.crop.buy + 'g') : 'Not sold for Gold'}}</td>
 							</tr>
 							<tr>
 								<th><i class="fa fa-fw fa-plus-square"></i> Sell</th>
@@ -528,46 +528,9 @@
 								</div>
 							</div>
 
-							<div class="col-md-12 col-xs-12 seed-source-options" style="margin-top:12px;">
-								<div class="row">
-									<div class="col-md-4 col-xs-12">
-										<b>Seed source</b><br>
-										<select class="form-control" ng-model="self.newplan.seed_source">
-											<option value="buy_all">Buy all</option>
-											<option value="existing_free">Existing / free</option>
-											<option value="mixed">Mixed</option>
-										</select>
-									</div>
-									<div class="col-md-4 col-xs-12" ng-show="self.newplan.seed_source == 'mixed'">
-										<b>Purchased quantity</b><br>
-										<input class="form-control" type="number" min="0" max="{{self.newplan.amount}}" ng-model="self.newplan.paid_seed_count">
-									</div>
-									<div class="col-md-4 col-xs-12">
-										<b>Initial seed cost</b><br>
-										<div class="form-control" style="background:#f7f7f7;">{{self.newplan.get_paid_seed_count()}} seed(s) · {{self.newplan.get_cost(1)}}g</div>
-									</div>
-								</div>
-								<label style="margin-top:10px;">
-									<input type="checkbox" ng-model="self.newplan.replant_same_source"> Use the same seed source for AutoPlant replants
-								</label>
-								<div class="row" ng-show="!self.newplan.replant_same_source">
-									<div class="col-md-4 col-xs-12">
-										<b>Replant seed source</b><br>
-										<select class="form-control" ng-model="self.newplan.replant_seed_source">
-											<option value="buy_all">Buy all</option>
-											<option value="existing_free">Existing / free</option>
-											<option value="mixed">Mixed</option>
-										</select>
-									</div>
-									<div class="col-md-4 col-xs-12" ng-show="self.newplan.replant_seed_source == 'mixed'">
-										<b>Purchased per replant</b><br>
-										<input class="form-control" type="number" min="0" max="{{self.newplan.amount}}" ng-model="self.newplan.replant_paid_seed_count">
-									</div>
-									<div class="col-md-4 col-xs-12">
-										<b>Cost per replant</b><br>
-										<div class="form-control" style="background:#f7f7f7;">{{self.newplan.get_paid_seed_count(true)}} seed(s) · {{self.newplan.get_cost(1, true)}}g</div>
-									</div>
-								</div>
+							<div class="col-md-12 col-xs-12" style="margin-top:12px;">
+								<div class="text-muted" ng-show="self.newplan.crop_id && self.crops[self.newplan.crop_id].buy">Seed cost defaults to Buy all: {{self.newplan.get_cost(1)}}g</div>
+								<div class="text-muted" ng-show="self.newplan.crop_id && !self.crops[self.newplan.crop_id].buy">No Gold seed cost — this item is not sold for Gold or uses an exchange source.</div>
 							</div>
 
 							<div class="col-md-12 col-xs-12 plant-actions">
@@ -716,7 +679,7 @@
 	<a href="https://github.com/dameoffensive-cloud/crop_planner" target="_blank" rel="noreferrer">source code</a>
 	available under the MIT License.
 	<br>
-	Last updated: March 8, 2026
+	Last updated: September 27, 2026
 </div>
 
 <div class="support-footer">
