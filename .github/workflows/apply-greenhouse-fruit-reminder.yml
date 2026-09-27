@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add recurring reminder
+      - name: Apply recurring reminder
         run: python3 utils/apply_greenhouse_fruit_reminder.py
       - name: Validate planner files and cadence
         run: |
@@ -23,11 +23,13 @@ jobs:
           node --check scripts/planner.js
           grep -q "calendar_reminders" scripts/planner.js
           grep -q "Collect greenhouse fruit" index.html
+          grep -q '"start_day": 22' config.json
+          grep -q '"interval_days": 3' config.json
       - name: Commit reminder
         run: |
           rm utils/apply_greenhouse_fruit_reminder.py .github/workflows/apply-greenhouse-fruit-reminder.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add config.json scripts/planner.js index.html utils/apply_greenhouse_fruit_reminder.py .github/workflows/apply-greenhouse-fruit-reminder.yml
+          git add -A
           git commit -m "Add recurring greenhouse fruit reminder"
           git push
