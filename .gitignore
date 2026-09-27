@@ -1,3 +1,5 @@
 utils/data/*
 *.pyo
 *.pyc
+
+# Deployment marker: greenhouse fruit reminder (2026-09-27)
